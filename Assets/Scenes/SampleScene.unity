@@ -241,7 +241,7 @@ GameObject:
   m_Component:
   - component: {fileID: 53792795}
   - component: {fileID: 53792796}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -405,7 +405,7 @@ GameObject:
   m_Component:
   - component: {fileID: 402130962}
   - component: {fileID: 402130965}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -439,7 +439,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a635c19d933279444a582addbde5cc75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 4
+  speed: 6
   mouths:
   - {fileID: 6128299156075563123, guid: 18c9d088eff57f1479a6e6e7008c37f8, type: 3}
   - {fileID: 3386662938922423588, guid: 18c9d088eff57f1479a6e6e7008c37f8, type: 3}

@@ -3,64 +3,60 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour {
-	public float speed = 8f;
-	
-	Vector2Int currentDirection = Vector2Int.zero;
-	
-	float mouthAnimTime = 0f;
-	
 	GameObject visual;
 	SpriteRenderer visualRenderer;
-	public Sprite[] mouths;
 	
 	void Awake() {
 		visual = transform.GetChild(0).gameObject;
 		visualRenderer = visual.GetComponent<SpriteRenderer>();
 	}
 	
+	public float speed = 6f;
+	Vector2Int currentDirection = Vector2Int.zero;
+	
+	public Sprite[] mouths;
+	float mouthAnimTime = 0f;
+	
 	// Version of sign that says "actually i don't like floating-point numbers
 	// representing approximations, i actually want zero to have a sign of 0."
 	int correctSign(float x) => x == 0f ? 0 : (int)Mathf.Sign(x);
 	
-	int directionToIndex(Vector2Int direction) {
-		if (direction == Vector2Int.right) return 0;
-		if (direction == Vector2Int.down) return 1;
-		if (direction == Vector2Int.left) return 2;
-		if (direction == Vector2Int.up) return 3;
-		return 0;
-	}
+	private static List<Vector2Int> directions = new List<Vector2Int>() {
+		Vector2Int.right, Vector2Int.down, Vector2Int.left, Vector2Int.up
+	};
 	
-	Vector2 nearestTile(Vector2 v) => new Vector2( 
-		Mathf.Round(v.x), Mathf.Round(v.y)
+	int directionToIndex(Vector2Int direction) => directions.IndexOf(direction); 
+	// Vector2Int indexToDirection(int direction) => directions[direction % directions.Count]; 
+	
+	Vector2 round(Vector2 v) => new Vector2(Mathf.Round(v.x), Mathf.Round(v.y));
+	Vector2Int roundToInt(Vector2 v) => new Vector2Int(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y));
+	
+	Vector2 roundUnusedAxis(Vector2 pos, Vector2Int dir) => new Vector2(
+		dir.x == 0 ? Mathf.Round(pos.x) : pos.x,
+		dir.y == 0 ? Mathf.Round(pos.y) : pos.y
 	);
 	
-	Vector2 rotate90(Vector2 v) => new Vector2(-v.y, v.x);
+	bool tileInDirectionIsEmpty(Vector2 direction, float spread = 0.2f) {
+		spread = Mathf.Clamp01(spread);
+		Vector2 perpendicular = Vector2.Perpendicular(direction) * spread;
+		
+		Vector2 difference = round(direction - perpendicular) - round(direction + perpendicular);
+		Vector2 box = (difference + Vector2.one) / 2 - (Vector2.one / 10);
+		
+		return DebugDrawSquare(round(transform.position) + direction, box,
+		Physics2D.OverlapBox( round(transform.position) + direction, box, 0f, 1 << LayerMask.NameToLayer("Board") ) == null );
+	}
 	
-	bool tileInDirectionIsEmpty(Vector2 direction, float spread = 0.2f) =>
-	DebugDrawSquare(nearestTile(transform.position + (Vector3)(direction - rotate90(direction) * spread)), 0.5f) &&
-	DebugDrawSquare(nearestTile(transform.position + (Vector3)(direction + rotate90(direction) * spread)), 0.5f) &&
-	Physics2D.OverlapBox(
-		nearestTile(transform.position + (Vector3)(direction - rotate90(direction) * spread)),
-		Vector2.one * 0.5f, 0f,
-		1 << LayerMask.NameToLayer("Board")
-	) == null && spread > 0f && Physics2D.OverlapBox(
-		nearestTile(transform.position + (Vector3)(direction + rotate90(direction) * spread)),
-		Vector2.one * 0.5f, 0f,
-		1 << LayerMask.NameToLayer("Board")
-	) == null;
+	bool tileIsEmpty(Vector2Int position) =>
+		Physics2D.OverlapBox( position, Vector2.one / 2, 0f, 1 << LayerMask.NameToLayer("Board") ) == null;
 	
-	bool DebugDrawSquare(Vector2 position, float radius) {
-		for (int i = 0; i < 2; i++) {
-			Debug.DrawLine(
-				position + new Vector2(-radius, (i > 0) ? radius : -radius),
-				position + new Vector2(+radius, (i > 0) ? radius : -radius)
-			);
-			Debug.DrawLine(
-				position + new Vector2((i > 0) ? radius : -radius, -radius),
-				position + new Vector2((i > 0) ? radius : -radius, +radius)
-			);
-		}
-		return true;
+	bool DebugDrawSquare(Vector2 position, Vector2 radius, bool cond) {
+		Color c = cond ? Color.green : Color.white;
+		Debug.DrawLine( position + new Vector2(-radius.x, +radius.y), position + new Vector2(+radius.x, +radius.y), c );
+		Debug.DrawLine( position + new Vector2(+radius.x, -radius.y), position + new Vector2(+radius.x, +radius.y), c );
+		Debug.DrawLine( position + new Vector2(-radius.x, -radius.y), position + new Vector2(+radius.x, -radius.y), c );
+		Debug.DrawLine( position + new Vector2(-radius.x, -radius.y), position + new Vector2(-radius.x, +radius.y), c );
+		return cond;
 	}
 	
 	void Update() {
@@ -77,32 +73,38 @@ public class Player : MonoBehaviour {
 		bool changed = false;
 		
 		if (allowHorizontal) {
-			if (move.x < 0 && tileInDirectionIsEmpty(Vector2.left)) { currentDirection = Vector2Int.left; changed = true; }
-			if (move.x > 0 && tileInDirectionIsEmpty(Vector2.right)) { currentDirection = Vector2Int.right; changed = true; }
+			if (move.x < 0 && tileInDirectionIsEmpty(Vector2Int.left)) { currentDirection = Vector2Int.left; changed = true; }
+			if (move.x > 0 && tileInDirectionIsEmpty(Vector2Int.right)) { currentDirection = Vector2Int.right; changed = true; }
 		}
 		if (allowVertical) {
 			// Nobody makes 2D games in +Y-up worlds, Unity.
-			if (move.y < 0 && tileInDirectionIsEmpty(Vector2.down)) { currentDirection = Vector2Int.down; changed = true; }
-			if (move.y > 0 && tileInDirectionIsEmpty(Vector2.up)) { currentDirection = Vector2Int.up; changed = true; }
+			if (move.y < 0 && tileInDirectionIsEmpty(Vector2Int.down)) { currentDirection = Vector2Int.down; changed = true; }
+			if (move.y > 0 && tileInDirectionIsEmpty(Vector2Int.up)) { currentDirection = Vector2Int.up; changed = true; }
 		}
 		
-		if (changed)
-			transform.position = nearestTile(transform.position);
+		if (changed) transform.position = roundUnusedAxis(transform.position, currentDirection);
 		
-		Collider2D facingCollider = Physics2D.OverlapBox(
-			nearestTile(transform.position + (Vector3)(Vector2)currentDirection / 2f),
-			Vector2.one * 0.49f, 0f,
-			1 << LayerMask.NameToLayer("Board")
-		);
-		if (facingCollider) {
-			currentDirection = Vector2Int.zero;
-			transform.position = nearestTile(transform.position);
-		} else if (currentDirection.sqrMagnitude > 0f) {
+		// Technical Information: I'm treating 1 Unity unit as equal to 1 tile in the original Pac-Man tile map.
+		
+		// This means that adding half a tile to the position in the current direction means the side of
+		// Pac-Man's hitbox associated with the direction he is moving in.
+		
+		// Dividing by 4 should never be used. Half-tiles should never be used.
+		
+		if (currentDirection.sqrMagnitude > 0f) {
+			Vector2Int lastTile = roundToInt((Vector2)transform.position + ((Vector2)currentDirection / 2));
+			
 			transform.Translate((Vector2)currentDirection * speed * Time.deltaTime);
 			mouthAnimTime += Time.deltaTime * speed;
 			
 			int dirIndex = directionToIndex(currentDirection);
 			visualRenderer.sprite = mouths[dirIndex * 4 + Mathf.FloorToInt((mouthAnimTime % 1f) * mouths.Length / 4)];
+			
+			Vector2Int newTile = roundToInt((Vector2)transform.position + ((Vector2)currentDirection / 2));
+			if (lastTile != newTile && !tileIsEmpty(newTile)) {
+				transform.position = round(transform.position);
+				currentDirection = Vector2Int.zero;
+			}
 		}
 	}
 }
