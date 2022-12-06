@@ -36,19 +36,27 @@ public class Player : MonoBehaviour {
 		dir.y == 0 ? Mathf.Round(pos.y) : pos.y
 	);
 	
-	bool tileInDirectionIsEmpty(Vector2 direction, float spread = 0.2f) {
-		spread = Mathf.Clamp01(spread);
-		Vector2 perpendicular = Vector2.Perpendicular(direction) * spread;
+	bool shouldTurnCornerYet(Vector2 direction, float minSimilarity = 15/16f) {
+		// the delta if we just turned now. (using this every time means the movement looks jerky.)
+		Vector2 jerkTo = (round(transform.position) + direction - (Vector2)transform.position);
+		// the delta if we waited until we were aligned with a tile to turn.
+		Vector2 waitTo = (round(transform.position) + direction - round(transform.position));
 		
-		Vector2 difference = round(direction - perpendicular) - round(direction + perpendicular);
-		Vector2 box = (difference + Vector2.one) / 2 - (Vector2.one / 10);
+		float similarity = Vector2.Dot(jerkTo.normalized, waitTo.normalized);
+		bool turnNow = similarity >= minSimilarity;
 		
-		return DebugDrawSquare(round(transform.position) + direction, box,
-		Physics2D.OverlapBox( round(transform.position) + direction, box, 0f, 1 << LayerMask.NameToLayer("Board") ) == null );
+		Debug.DrawRay(transform.position, jerkTo, turnNow? Color.yellow : Color.red, 1f);
+		Debug.DrawRay(round(transform.position), waitTo, Color.white);
+		return turnNow;
+	}
+	
+	bool tileInDirectionIsEmpty(Vector2 direction) {
+		return shouldTurnCornerYet(direction) && DebugDrawSquare(round(transform.position) + direction, Vector2.one * 0.49f,
+		Physics2D.OverlapBox( round(transform.position) + direction, Vector2.one * 0.49f, 0f, 1 << LayerMask.NameToLayer("Board") ) == null );
 	}
 	
 	bool tileIsEmpty(Vector2Int position) =>
-		Physics2D.OverlapBox( position, Vector2.one / 2, 0f, 1 << LayerMask.NameToLayer("Board") ) == null;
+		Physics2D.OverlapPoint( position, 1 << LayerMask.NameToLayer("Board") ) == null;
 	
 	bool DebugDrawSquare(Vector2 position, Vector2 radius, bool cond) {
 		Color c = cond ? Color.green : Color.white;
@@ -90,6 +98,8 @@ public class Player : MonoBehaviour {
 		// Pac-Man's hitbox associated with the direction he is moving in.
 		
 		// Dividing by 4 should never be used. Half-tiles should never be used.
+		
+		// The board's polygonal hitbox corresponds to the original Pac-Man board tile map, hence why I
 		
 		if (currentDirection.sqrMagnitude > 0f) {
 			Vector2Int lastTile = roundToInt((Vector2)transform.position + ((Vector2)currentDirection / 2));
