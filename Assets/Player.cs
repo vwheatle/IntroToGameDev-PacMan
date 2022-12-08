@@ -36,7 +36,7 @@ public class Player : MonoBehaviour {
 		dir.y == 0 ? Mathf.Round(pos.y) : pos.y
 	);
 	
-	bool shouldTurnCornerYet(Vector2 direction, float minSimilarity = 15/16f) {
+	bool shouldTurnCornerYet(Vector2 direction, float minSimilarity = 29/32f) {
 		// the delta if we just turned now. (using this every time means the movement looks jerky.)
 		Vector2 jerkTo = (round(transform.position) + direction - (Vector2)transform.position);
 		// the delta if we waited until we were aligned with a tile to turn.
