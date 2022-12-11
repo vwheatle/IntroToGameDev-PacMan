@@ -11,6 +11,7 @@ public class Player : MonoBehaviour {
 	void Awake() {
 		visual = transform.GetChild(0).gameObject;
 		visualRenderer = visual.GetComponent<SpriteRenderer>();
+		lastMouth = visualRenderer.sprite;
 		
 		animator = GetComponent<Animator>();
 	}
@@ -19,6 +20,7 @@ public class Player : MonoBehaviour {
 	Vector2Int currentDirection = Vector2Int.zero;
 	
 	public Sprite[] mouths;
+	private Sprite lastMouth;
 	public float mouthAnimSpeed = 4f;
 	float mouthAnimTime = 0f;
 	
@@ -117,8 +119,8 @@ public class Player : MonoBehaviour {
 			transform.Translate((Vector2)currentDirection * speed * Time.deltaTime);
 			mouthAnimTime += Time.deltaTime * mouthAnimSpeed;
 			
-			// https://forum.unity.com/threads/animator-locking-animated-value-even-when-current-state-has-no-curves-keys-for-that-value.440363/
-			// LOLLL FUCK YOU UNITY (specifically Mechanim.)
+			int dirIndex = directionToIndex(currentDirection);
+			lastMouth = mouths[dirIndex * 4 + Mathf.FloorToInt((mouthAnimTime % 1f) * mouths.Length / 4)];
 			
 			Vector2Int newTile = roundToInt((Vector2)transform.position + ((Vector2)currentDirection / 2));
 			if (lastTile != newTile && !tileIsEmpty(newTile)) {
@@ -131,15 +133,14 @@ public class Player : MonoBehaviour {
 	void LateUpdate() {
 		if (!movable) return;
 		
-		if (currentDirection.sqrMagnitude > 0) {
-			int dirIndex = directionToIndex(currentDirection);
-			visualRenderer.sprite = mouths[dirIndex * 4 + Mathf.FloorToInt((mouthAnimTime % 1f) * mouths.Length / 4)];
-		}
+		// https://forum.unity.com/threads/animator-locking-animated-value-even-when-current-state-has-no-curves-keys-for-that-value.440363/
+		// LOLLL FUCK YOU UNITY (specifically Mechanim.)
+		visualRenderer.sprite = lastMouth;
 	}
 	
 	// MESSAGES
 	
-	void Die() => animator.Play("PlayerDie");
+	void Die() => animator.SetBool("Dead", true);
 	
 	// ANIMATION EVENTS
 	
