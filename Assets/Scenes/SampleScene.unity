@@ -583,7 +583,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!102 &625746125
 TextMesh:
   serializedVersion: 3
@@ -740,57 +740,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 693932900}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &707085168 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4233474648178519550, guid: 01e10f7c6d02f7a4098806fe8ab71d7d,
-    type: 3}
-  m_PrefabInstance: {fileID: 4233474647967229423}
-  m_PrefabAsset: {fileID: 0}
---- !u!61 &707085169
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 707085168}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
---- !u!95 &707085171
-Animator:
-  serializedVersion: 3
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 707085168}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 81cd55142e89c304cbb7fed0626d546e, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1001 &766766473
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1108,7 +1057,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!60 &1111223993
 PolygonCollider2D:
@@ -1623,6 +1572,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1359824565}
+  - component: {fileID: 1359824566}
   m_Layer: 8
   m_Name: Enemies
   m_TagString: Untagged
@@ -1648,6 +1598,19 @@ Transform:
   m_Father: {fileID: 1111223995}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1359824566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1359824564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74542e7db2769114ea61f9076696d958, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scareTimeLength: 7
 --- !u!4 &1479235234 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2620288034720457959, guid: 42cbe1803ad5e69499ca3d95f43ad5fa,
@@ -2089,7 +2052,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: Pinky
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7493122480934179253, guid: 38f18e61eda3b5c4e978abe31874faca, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 38f18e61eda3b5c4e978abe31874faca, type: 3}
 --- !u!4 &32452258384183660 stripped
 Transform:
