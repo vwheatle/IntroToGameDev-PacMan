@@ -15,7 +15,9 @@ public class Player : MonoBehaviour {
 	Vector2Int currentDirection = Vector2Int.zero;
 	
 	public Sprite[] mouths;
+	public float mouthAnimSpeed = 4f;
 	float mouthAnimTime = 0f;
+	
 	
 	// Version of sign that says "actually i don't like floating-point numbers
 	// representing approximations, i actually want zero to have a sign of 0."
@@ -105,7 +107,7 @@ public class Player : MonoBehaviour {
 			Vector2Int lastTile = roundToInt((Vector2)transform.position + ((Vector2)currentDirection / 2));
 			
 			transform.Translate((Vector2)currentDirection * speed * Time.deltaTime);
-			mouthAnimTime += Time.deltaTime * speed;
+			mouthAnimTime += Time.deltaTime * mouthAnimSpeed;
 			
 			int dirIndex = directionToIndex(currentDirection);
 			visualRenderer.sprite = mouths[dirIndex * 4 + Mathf.FloorToInt((mouthAnimTime % 1f) * mouths.Length / 4)];
