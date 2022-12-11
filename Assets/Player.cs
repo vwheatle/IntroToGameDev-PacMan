@@ -1,14 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour {
+	Animator animator;
 	GameObject visual;
 	SpriteRenderer visualRenderer;
 	
 	void Awake() {
 		visual = transform.GetChild(0).gameObject;
 		visualRenderer = visual.GetComponent<SpriteRenderer>();
+		
+		animator = GetComponent<Animator>();
 	}
 	
 	public float speed = 6f;
@@ -17,6 +21,8 @@ public class Player : MonoBehaviour {
 	public Sprite[] mouths;
 	public float mouthAnimSpeed = 4f;
 	float mouthAnimTime = 0f;
+	
+	bool movable = true;
 	
 	
 	// Version of sign that says "actually i don't like floating-point numbers
@@ -70,6 +76,8 @@ public class Player : MonoBehaviour {
 	}
 	
 	void Update() {
+		if (!movable) return;
+		
 		Vector2 movef = new Vector2(
 			Input.GetAxisRaw("Horizontal"),
 			Input.GetAxisRaw("Vertical")
@@ -109,8 +117,8 @@ public class Player : MonoBehaviour {
 			transform.Translate((Vector2)currentDirection * speed * Time.deltaTime);
 			mouthAnimTime += Time.deltaTime * mouthAnimSpeed;
 			
-			int dirIndex = directionToIndex(currentDirection);
-			visualRenderer.sprite = mouths[dirIndex * 4 + Mathf.FloorToInt((mouthAnimTime % 1f) * mouths.Length / 4)];
+			// https://forum.unity.com/threads/animator-locking-animated-value-even-when-current-state-has-no-curves-keys-for-that-value.440363/
+			// LOLLL FUCK YOU UNITY (specifically Mechanim.)
 			
 			Vector2Int newTile = roundToInt((Vector2)transform.position + ((Vector2)currentDirection / 2));
 			if (lastTile != newTile && !tileIsEmpty(newTile)) {
@@ -118,5 +126,27 @@ public class Player : MonoBehaviour {
 				currentDirection = Vector2Int.zero;
 			}
 		}
+	}
+	
+	void LateUpdate() {
+		if (!movable) return;
+		
+		if (currentDirection.sqrMagnitude > 0) {
+			int dirIndex = directionToIndex(currentDirection);
+			visualRenderer.sprite = mouths[dirIndex * 4 + Mathf.FloorToInt((mouthAnimTime % 1f) * mouths.Length / 4)];
+		}
+	}
+	
+	// MESSAGES
+	
+	void Die() => animator.Play("PlayerDie");
+	
+	// ANIMATION EVENTS
+	
+	void EnableMovement() => movable = true;
+	void DisableMovement() => movable = false;
+	
+	void DoneDying() {
+		SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 	}
 }
